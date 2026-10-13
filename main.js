@@ -26,19 +26,20 @@ if(f){
     b.disabled=false;b.textContent='Request quote'
   });
 }
-// Call Us: open/closed status (Mon to Sat, 9:30 am to 7 pm IST) with a demo toggle (remove #dm before launch)
+// Call Us: open/closed status (Mon to Sat, 9:30 am to 7 pm IST). The #dm button flips the shown state for demos; remove #dm before launch.
 const st=$('#st');
 if(st){
-  let force=false;const D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let flip=false;const D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const upd=()=>{
     const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',weekday:'long',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date());
     const g=t=>p.find(x=>x.type===t).value,i=D.indexOf(g('weekday')),h=(+g('hour'))%24+(+g('minute'))/60;
-    let c='closed',m;
-    if(force||(i>0&&h>=9.5&&h<19)){c='open';m='Open now, closes at 7 pm'}
+    const open=(i>0&&h>=9.5&&h<19)!==flip;let m;
+    if(open)m='Open now, closes at 7 pm';
     else if(i>0&&h<9.5)m='Closed, opens today at 9:30 am';
     else{const n=(i+1)%7||1;m='Closed, opens '+(n===(i+1)%7&&n!==1?'tomorrow':D[n])+' at 9:30 am'}
-    st.className='pill '+c;st.textContent=m;
+    st.className='pill '+(open?'open':'closed');st.textContent=m;
+    $('#dm').textContent=open?'Preview closed state':'Preview open state';
   };
-  $('#dm').addEventListener('click',e=>{force=!force;e.target.textContent=force?'Back to live status':'Preview open state';upd()});
+  $('#dm').addEventListener('click',()=>{flip=!flip;upd()});
   upd();setInterval(upd,60000);
 }
