@@ -1,31 +1,5 @@
-// Contact form: paste a free Web3Forms access key here to receive submissions by email.
-// While empty, the form runs in demo mode (validates, then shows the success message).
-const KEY='';
 const $=s=>document.querySelector(s);
 $('#m')?.addEventListener('click',()=>$('#nv').classList.toggle('open'));
-const f=$('#qf');
-if(f){
-  const p=new URLSearchParams(location.search).get('plan');if(p)f.plan.value=p;
-  f.message.addEventListener('input',()=>$('#cnt').textContent=f.message.value.length+'/500');
-  f.addEventListener('submit',async e=>{
-    e.preventDefault();const out=$('#out');out.className='';out.textContent='';
-    const d=Object.fromEntries(new FormData(f));if(d.website)return;
-    const er=[],ph=d.phone.replace(/\D/g,'').slice(-10);
-    if(d.name.trim().length<2)er.push('Enter your name.');
-    if(d.model.trim().length<2)er.push('Enter your device brand and model.');
-    if(!/^[6-9]\d{9}$/.test(ph))er.push('Enter a valid 10-digit mobile number.');
-    if(d.email&&!/^\S+@\S+\.\S+$/.test(d.email))er.push('Enter a valid email address.');
-    if(!d.consent)er.push('Tick the consent box to continue.');
-    if(er.length){out.className='err';out.textContent=er.join(' ');return}
-    const b=f.querySelector('button');b.disabled=true;b.textContent='Sending...';
-    try{
-      if(KEY){const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,phone:ph,access_key:KEY,subject:'New quote request - Insuarted'})});if(!(await r.json()).success)throw 0}
-      else await new Promise(r=>setTimeout(r,700));
-      f.reset();$('#cnt').textContent='0/500';out.className='ok';out.textContent='Request received. We will call you within one working day.'
-    }catch{out.className='err';out.textContent='Could not send your request. Try again or call us.'}
-    b.disabled=false;b.textContent='Request quote'
-  });
-}
 // Call Us: open/closed status (Mon to Sat, 9:30 am to 7 pm IST). The #dm button flips the shown state for demos; remove #dm before launch.
 const st=$('#st');
 if(st){
@@ -42,4 +16,24 @@ if(st){
   };
   $('#dm').addEventListener('click',()=>{flip=!flip;upd()});
   upd();setInterval(upd,60000);
+}
+// Email assist: builds the mailto link, and shows a copy-and-paste panel when the mail app does not open.
+const mt=$('#mt');
+if(mt){
+  const MAIL='hello@insuarted.example',P=new URLSearchParams(location.search).get('service'),q=encodeURIComponent;
+  const SUB=P?'Enquiry about the '+P+' service':'Enquiry about Insuarted services';
+  const BODY=['Name:','Phone:','Device brand and model:','Purchase date:','Service of interest: '+(P||''),'Message:'].join('\n');
+  const href='mailto:'+MAIL+'?subject='+q(SUB)+'&body='+q(BODY.split('\n').join('\r\n'));
+  mt.href=href;
+  $('#to').value=MAIL;$('#sj').value=SUB;$('#bd').value=BODY;
+  $('#gm').href='https://mail.google.com/mail/?view=cm&fs=1&to='+q(MAIL)+'&su='+q(SUB)+'&body='+q(BODY);
+  $('#ol').href='https://outlook.office.com/mail/deeplink/compose?to='+q(MAIL)+'&subject='+q(SUB)+'&body='+q(BODY);
+  const ap=$('#ap'),show=()=>{ap.hidden=false;ap.scrollIntoView({behavior:'smooth',block:'center'})};
+  $('#ea').onclick=show;
+  let left=false;const mark=()=>{left=true};addEventListener('blur',mark);document.addEventListener('visibilitychange',mark);
+  mt.addEventListener('click',()=>{left=false;setTimeout(()=>{if(!left)show()},1500)});
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{
+    const e=$(b.dataset.c),o=b.textContent;
+    try{await navigator.clipboard.writeText(e.value)}catch{e.select();document.execCommand('copy')}
+    b.textContent='Copied';setTimeout(()=>b.textContent=o,1500)});
 }
