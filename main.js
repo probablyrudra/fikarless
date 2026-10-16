@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s);
 $('#m')?.addEventListener('click',()=>$('#nv').classList.toggle('open'));
-// Call Us: open/closed status (Mon to Sat, 9:30 am to 7 pm IST). The #dm button flips the shown state for demos; remove #dm before launch.
+// Business line: open/closed status (Mon to Sat, 9:30 am to 7 pm IST). The #dm button flips the shown state for demos; remove #dm before launch.
 const st=$('#st');
 if(st){
   let flip=false;const D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -17,21 +17,29 @@ if(st){
   $('#dm').addEventListener('click',()=>{flip=!flip;upd()});
   upd();setInterval(upd,60000);
 }
-// Email assist: builds the mailto link, and shows a copy-and-paste panel when the mail app does not open.
-const mt=$('#mt');
-if(mt){
-  const MAIL='hello@insuarted.example',P=new URLSearchParams(location.search).get('service'),q=encodeURIComponent;
-  const SUB=P?'Enquiry about the '+P+' service':'Enquiry about Insuarted services';
-  const BODY=['Name:','Phone:','Device brand and model:','Purchase date:','Service of interest: '+(P||''),'Message:'].join('\n');
-  const href='mailto:'+MAIL+'?subject='+q(SUB)+'&body='+q(BODY.split('\n').join('\r\n'));
-  mt.href=href;
-  $('#to').value=MAIL;$('#sj').value=SUB;$('#bd').value=BODY;
-  $('#gm').href='https://mail.google.com/mail/?view=cm&fs=1&to='+q(MAIL)+'&su='+q(SUB)+'&body='+q(BODY);
-  $('#ol').href='https://outlook.office.com/mail/deeplink/compose?to='+q(MAIL)+'&subject='+q(SUB)+'&body='+q(BODY);
-  const ap=$('#ap'),show=()=>{ap.hidden=false;ap.scrollIntoView({behavior:'smooth',block:'center'})};
-  $('#ea').onclick=show;
-  let left=false;const mark=()=>{left=true};addEventListener('blur',mark);document.addEventListener('visibilitychange',mark);
-  mt.addEventListener('click',()=>{left=false;setTimeout(()=>{if(!left)show()},1500)});
+// Email: the user enters their full name, which goes into the subject. If the mail app does not open, a copy-and-paste panel appears.
+const fn=$('#fn');
+if(fn){
+  const CH={claims:{to:'support@easyclaims.example',tag:'Claims and customer service',nm:'Easyclaims'},biz:{to:'hello@insuarted.example',tag:'Enquiry or complaint',nm:'Insuarted'}};
+  const S=new URLSearchParams(location.search).get('service'),q=encodeURIComponent,ap=$('#ap'),err=$('#fe');
+  const nm=()=>fn.value.trim();
+  const body=()=>['Full name: '+nm(),'Phone:','Device brand and model:','Purchase date:','Service of interest: '+(S||''),'Message:'].join('\n');
+  const sub=c=>CH[c].tag+': '+nm();
+  const mail=c=>'mailto:'+CH[c].to+'?subject='+q(sub(c))+'&body='+q(body().split('\n').join('\r\n'));
+  const links=()=>document.querySelectorAll('[data-ch]').forEach(a=>a.href=mail(a.dataset.ch));
+  let cur='biz',left=false;
+  const need=()=>{if(nm().length<2){err.textContent='Please enter your full name first. It goes into the email subject.';fn.focus();return true}err.textContent='';return false};
+  const fill=c=>{cur=c;const t=CH[c].to,s=sub(c),b=body();$('#pn').textContent=CH[c].nm;$('#to').value=t;$('#sj').value=s;$('#bd').value=b;
+    $('#gm').href='https://mail.google.com/mail/?view=cm&fs=1&to='+q(t)+'&su='+q(s)+'&body='+q(b);
+    $('#ol').href='https://outlook.office.com/mail/deeplink/compose?to='+q(t)+'&subject='+q(s)+'&body='+q(b)};
+  const show=c=>{if(need())return;fill(c);ap.hidden=false;ap.scrollIntoView({behavior:'smooth',block:'center'})};
+  addEventListener('blur',()=>{left=true});document.addEventListener('visibilitychange',()=>{left=true});
+  document.querySelectorAll('[data-ch]').forEach(a=>a.addEventListener('click',e=>{
+    if(need()){e.preventDefault();return}
+    left=false;setTimeout(()=>{if(!left)show(a.dataset.ch)},1500)}));
+  document.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>show(b.dataset.help));
+  fn.addEventListener('input',()=>{if(nm().length>1)err.textContent='';links();if(!ap.hidden)fill(cur)});
+  links();
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{
     const e=$(b.dataset.c),o=b.textContent;
     try{await navigator.clipboard.writeText(e.value)}catch{e.select();document.execCommand('copy')}
