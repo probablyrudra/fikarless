@@ -20,7 +20,7 @@ if(st){
 // Email: the user enters their full name, which goes into the subject. If the mail app does not open, a copy-and-paste panel appears.
 const fn=$('#fn');
 if(fn){
-  const CH={claims:{to:'support@easyclaims.example',tag:'Claims and customer service',nm:'Easyclaims'},biz:{to:'hello@insuarted.example',tag:'Enquiry or complaint',nm:'Insuarted'}};
+  const CH={claims:{to:'support@easyclaims.example',tag:'Claims and customer service',nm:'Easyclaims'},biz:{to:'hello@fikarless.example',tag:'Enquiry or complaint',nm:'Fikarless'}};
   const S=new URLSearchParams(location.search).get('service'),q=encodeURIComponent,ap=$('#ap'),err=$('#fe');
   const nm=()=>fn.value.trim();
   const body=()=>['Full name: '+nm(),'Phone:','Device brand and model:','Purchase date:','Service of interest: '+(S||''),'Message:'].join('\n');
